@@ -78,6 +78,33 @@ class CPU:
         PRN = 71 
         MUL = 162
 
+        def halt():
+            halted = True
+            sys.exit(1)
+
+        def load_immediate(operand_a, operand_b):
+            register = operand_a
+            integer = operand_b
+            self.reg[register] = integer
+            self.pc += 3
+
+        def _print():
+            register = operand_a
+            print(self.reg[register])
+            self.pc += 1
+
+        def mult(operand_a, operand_b):
+            self.alu('MUL', operand_a, operand_b)
+            self.pc += 3
+
+
+        branch_table = {
+            1: halt(),
+            130: load_immediate(),
+            71: _print(),
+            162: mult(),
+        }
+
         while not halted:
 
             instruction = self.ram_read(self.pc)
