@@ -42,6 +42,8 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
+        elif op == 'MUL':
+            self.reg[reg_a] *= self.reg[reg_b]
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -74,6 +76,7 @@ class CPU:
         HLT = 1
         LDI = 130
         PRN = 71 
+        MUL = 162
 
         while not halted:
 
@@ -84,15 +87,19 @@ class CPU:
             if instruction == HLT:
                 halted = True
                 break
+
+            elif instruction == MUL:
+                self.alu('MUL', operand_a, operand_b)
+                self.pc += 3
             
             elif instruction == LDI:    
                 register = operand_a
                 integer = operand_b
                 self.reg[register] = integer
+                self.pc += 3
 
             elif instruction == PRN:
                 register = operand_a
                 print(self.reg[register])
-            
-            self.pc += 1
+                self.pc += 1
 

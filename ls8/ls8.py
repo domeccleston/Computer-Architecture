@@ -13,4 +13,5 @@ program = sys.argv[1]
 cpu = CPU()
 
 cpu.load(program)
+
 cpu.run()
