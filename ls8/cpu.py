@@ -11,6 +11,10 @@ class CPU:
         self.reg = [0] * 8
         self.ram = [0] * 256
 
+        # system stack
+        self.SP = 7
+        self.reg[self.SP] = 0xf4
+
         self.instructions = {
             1: "HLT",
             130: "LDI",
@@ -19,16 +23,36 @@ class CPU:
         }
 
         self.branch_table = {
-            0: self._pass,
             1: self.halt,
             130: self.load_immediate,
             71: self._print,
-            162: self.mult
+            162: self.mult,
+            69: self.push,
+            70: self.pop
         }
+    
+    def call(self, instruction, operand_a, operand_b):
+        self.push(operand_b)
+        self.pc = operand_a
 
-    def _pass(self, instruction, operand_a, operand_b):
-        self.pc += 1
-        pass
+    def ret(self, instruction, operand_a, operand_b):
+        value = self.pop()
+        self.pc = value
+
+    def push(self, instruction, operand_a, operand_b):
+        self.reg[self.SP] -= 1
+        reg_num = self.ram[self.pc + 1]
+        reg_val = self.reg[reg_num]
+        self.ram[self.reg[self.SP]] = reg_val
+        self.pc += 2
+
+    def pop(self, instruction, operand_a, operand_b):
+        reg_num = self.ram[self.pc + 1]
+        popped_value = self.ram[self.reg[self.SP]]
+        self.reg[reg_num] = self.ram[self.reg[self.SP]]
+        self.reg[self.SP] += 1
+        self.pc += 2
+        return popped_value
 
     def halt(self, instruction, operand_a, operand_b):
         halted = True
@@ -106,7 +130,7 @@ class CPU:
 
         print()
 
-    def run(self):
+    def run(self):  
         """Run the CPU."""
 
         halted = False
@@ -117,5 +141,9 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
-            self.branch_table[instruction](instruction, operand_a, operand_b)
+            # execute the instruction
+            if instruction in self.branch_table:
+                self.branch_table[instruction](instruction, operand_a, operand_b)
+            else:
+                self.pc += 1
 
