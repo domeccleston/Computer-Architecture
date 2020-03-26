@@ -28,16 +28,22 @@ class CPU:
             71: self._print,
             162: self.mult,
             69: self.push,
-            70: self.pop
+            70: self.pop,
+            80: self.call,
         }
     
     def call(self, instruction, operand_a, operand_b):
-        self.push(operand_b)
-        self.pc = operand_a
+        reg = self.ram[self.pc + 1]
+        
+        self.reg[self.SP] -= 1
+        self.ram[self.reg[self.SP]] = self.pc + 2
+
+        self.pc = self.reg[reg]
 
     def ret(self, instruction, operand_a, operand_b):
-        value = self.pop()
-        self.pc = value
+        self.pc = self.ram[self.reg[self.SP]]
+        self.reg[self.SP] += 1
+
 
     def push(self, instruction, operand_a, operand_b):
         self.reg[self.SP] -= 1
